@@ -8,6 +8,61 @@ from dataclasses import dataclass
 
 _WORD = re.compile(r"[a-z0-9']+")
 
+STOPWORDS: frozenset[str] = frozenset(
+    {
+        "a",
+        "an",
+        "and",
+        "are",
+        "as",
+        "at",
+        "be",
+        "been",
+        "being",
+        "by",
+        "did",
+        "do",
+        "does",
+        "doing",
+        "for",
+        "from",
+        "had",
+        "has",
+        "have",
+        "he",
+        "her",
+        "hers",
+        "him",
+        "his",
+        "i",
+        "in",
+        "is",
+        "it",
+        "its",
+        "me",
+        "my",
+        "of",
+        "on",
+        "or",
+        "our",
+        "she",
+        "that",
+        "the",
+        "their",
+        "them",
+        "they",
+        "this",
+        "to",
+        "was",
+        "we",
+        "were",
+        "will",
+        "with",
+        "you",
+        "your",
+    }
+)
+
 
 @dataclass(frozen=True, slots=True)
 class Count:
@@ -20,8 +75,15 @@ def tokenise(text: str) -> list[str]:
     return _WORD.findall(text.lower())
 
 
-def count_words(text: str) -> list[Count]:
-    """Counts, most frequent first, ties broken alphabetically so it is stable."""
-    counter = Counter(tokenise(text))
+def count_words(text: str, stopwords: frozenset[str] | None = None) -> list[Count]:
+    """Counts, most frequent first, ties broken alphabetically so it is stable.
+
+    `stopwords`, if given, is a set of words to drop after tokenising and
+    before counting. Left as `None` (the default), no filtering happens.
+    """
+    words = tokenise(text)
+    if stopwords:
+        words = [word for word in words if word not in stopwords]
+    counter = Counter(words)
     ordered = sorted(counter.items(), key=lambda item: (-item[1], item[0]))
     return [Count(word=word, total=total) for word, total in ordered]
