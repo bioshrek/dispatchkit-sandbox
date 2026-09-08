@@ -1,0 +1,80 @@
+plan = "wordfreq"
+
+# The first plan dispatchkit ever ran live.
+#
+# Every task here is a real chore against the `wordfreq` payload: a real diff,
+# real tests, real CI time. The design rules out no-op tasks, because a task
+# that cannot fail proves nothing about the pipeline that dispatched it.
+#
+# Each `acceptance` names a test selector that does not match anything yet, so
+# it fails today and can only pass once the work and its tests both exist.
+
+[[task]]
+id = "top-n"
+title = "Limit output with --top N"
+milestone = "wordfreq v0.2"
+lane = "cloud"
+verify = "human"
+estimate_minutes = 30
+touches = ["src/wordfreq/cli.py", "tests/test_cli.py"]
+acceptance = "uv run pytest -q -k top and uv run ruff check ."
+body_file = "wordfreq/top-n.md"
+
+[[task]]
+id = "stopwords"
+title = "Filter stopwords with --stopwords"
+milestone = "wordfreq v0.2"
+lane = "cloud"
+verify = "human"
+estimate_minutes = 45
+touches = ["src/wordfreq/count.py", "tests/test_count.py"]
+acceptance = "uv run pytest -q -k stopword and uv run ruff check ."
+body_file = "wordfreq/stopwords.md"
+
+[[task]]
+id = "encoding-fallback"
+title = "Survive a non-UTF-8 file"
+milestone = "wordfreq v0.2"
+lane = "cloud"
+verify = "human"
+estimate_minutes = 30
+touches = ["src/wordfreq/cli.py", "tests/test_cli.py"]
+acceptance = "uv run pytest -q -k encoding and uv run ruff check ."
+body_file = "wordfreq/encoding-fallback.md"
+
+[[task]]
+id = "json-output"
+title = "Emit machine-readable counts with --json"
+milestone = "wordfreq v0.2"
+lane = "cloud"
+verify = "human"
+estimate_minutes = 45
+touches = ["src/wordfreq/cli.py", "tests/test_cli.py"]
+acceptance = "uv run pytest -q -k json and uv run ruff check ."
+# A real artifact dependency, not narrative ordering: the JSON document has to
+# honour the limit, so the flag has to exist before its output can be shaped.
+depends = [{ on = "top-n", for = "the --top N flag whose limit the JSON must honour" }]
+body_file = "wordfreq/json-output.md"
+
+# The join. Documenting a flag surface needs the surface to be final, so this
+# waits on all four — which is also what earns `top-n` and `json-output` their
+# split, since `top-n` now has a second dependent.
+#
+# `verify = "auto"` because the acceptance is a grep: there is nothing here for
+# a human to judge that the command does not already decide.
+[[task]]
+id = "document-flags"
+title = "Document the new flags in the README"
+milestone = "wordfreq v0.2"
+lane = "cloud"
+verify = "auto"
+estimate_minutes = 30
+touches = ["README.md"]
+acceptance = "uv run pytest -q and grep -q -- '--top' README.md and grep -q -- '--stopwords' README.md and grep -q -- '--json' README.md and grep -q -- 'encoding' README.md"
+depends = [
+    { on = "top-n", for = "the --top N flag's final spelling and default" },
+    { on = "stopwords", for = "the --stopwords flag's final spelling and word list" },
+    { on = "json-output", for = "the JSON document's shape, which the README shows" },
+    { on = "encoding-fallback", for = "the fallback's behaviour, which the README states" },
+]
+body_file = "wordfreq/document-flags.md"
