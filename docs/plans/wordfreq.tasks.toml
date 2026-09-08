@@ -27,7 +27,9 @@ id = "stopwords"
 title = "Filter stopwords with --stopwords"
 milestone = "wordfreq v0.2"
 lane = "cloud"
-verify = "human"
+# `auto` because the acceptance is a pytest selector: there is nothing here a
+# human judges that the command does not already decide.
+verify = "auto"
 estimate_minutes = 45
 touches = ["src/wordfreq/count.py", "tests/test_count.py"]
 acceptance = "uv run pytest -q -k stopword && uv run ruff check ."
