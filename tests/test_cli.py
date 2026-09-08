@@ -22,3 +22,43 @@ def test_a_missing_file_is_reported_not_raised(
 ) -> None:
     assert main([str(tmp_path / "nope.txt")]) == 2
     assert "cannot read" in capsys.readouterr().err
+
+
+def test_top_limits_the_number_of_printed_words(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    source = tmp_path / "sample.txt"
+    source.write_text("a a b", encoding="utf-8")
+
+    assert main([str(source), "--top", "1"]) == 0
+    out = capsys.readouterr().out
+    assert "2  a" in out
+    assert "1  b" not in out
+
+
+def test_top_zero_prints_nothing(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    source = tmp_path / "sample.txt"
+    source.write_text("a a b", encoding="utf-8")
+
+    assert main([str(source), "--top", "0"]) == 0
+    assert capsys.readouterr().out == ""
+
+
+def test_top_without_flag_prints_everything(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    source = tmp_path / "sample.txt"
+    source.write_text("a a b", encoding="utf-8")
+
+    assert main([str(source)]) == 0
+    out = capsys.readouterr().out
+    assert "2  a" in out
+    assert "1  b" in out
+
+
+def test_top_negative_is_rejected(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    source = tmp_path / "sample.txt"
+    source.write_text("a a b", encoding="utf-8")
+
+    assert main([str(source), "--top", "-1"]) == 2
+    assert "--top" in capsys.readouterr().err
