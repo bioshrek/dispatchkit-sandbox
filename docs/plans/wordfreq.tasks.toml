@@ -64,8 +64,11 @@ body_file = "wordfreq/json-output.md"
 # waits on all four — which is also what earns `top-n` and `json-output` their
 # split, since `top-n` now has a second dependent.
 #
-# `verify = "auto"` because the acceptance is a grep: there is nothing here for
-# a human to judge that the command does not already decide.
+# `verify = "auto"` because there is nothing here for a human to judge that the
+# command does not already decide. The acceptance is a *test* rather than the
+# grep it started as: an acceptance CI does not run cannot gate a merge, and
+# dispatchkit now refuses the graph if it isn't. Expressing it as a test is
+# what makes the claim checkable by the same pipeline that merges it.
 [[task]]
 id = "document-flags"
 title = "Document the new flags in the README"
@@ -74,7 +77,7 @@ lane = "cloud"
 verify = "auto"
 estimate_minutes = 30
 touches = ["README.md"]
-acceptance = "uv run pytest -q && grep -q -- '--top' README.md && grep -q -- '--stopwords' README.md && grep -q -- '--json' README.md && grep -q -- 'encoding' README.md"
+acceptance = "uv run pytest -q -k readme"
 depends = [
     { on = "top-n", for = "the --top N flag's final spelling and default" },
     { on = "stopwords", for = "the --stopwords flag's final spelling and word list" },
