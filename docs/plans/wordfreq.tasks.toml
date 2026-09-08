@@ -17,7 +17,7 @@ lane = "cloud"
 verify = "human"
 estimate_minutes = 30
 touches = ["src/wordfreq/cli.py", "tests/test_cli.py"]
-acceptance = "uv run pytest -q -k top and uv run ruff check ."
+acceptance = "uv run pytest -q -k top && uv run ruff check ."
 body_file = "wordfreq/top-n.md"
 
 [[task]]
@@ -28,7 +28,7 @@ lane = "cloud"
 verify = "human"
 estimate_minutes = 45
 touches = ["src/wordfreq/count.py", "tests/test_count.py"]
-acceptance = "uv run pytest -q -k stopword and uv run ruff check ."
+acceptance = "uv run pytest -q -k stopword && uv run ruff check ."
 body_file = "wordfreq/stopwords.md"
 
 [[task]]
@@ -39,7 +39,7 @@ lane = "cloud"
 verify = "human"
 estimate_minutes = 30
 touches = ["src/wordfreq/cli.py", "tests/test_cli.py"]
-acceptance = "uv run pytest -q -k encoding and uv run ruff check ."
+acceptance = "uv run pytest -q -k encoding && uv run ruff check ."
 body_file = "wordfreq/encoding-fallback.md"
 
 [[task]]
@@ -50,7 +50,7 @@ lane = "cloud"
 verify = "human"
 estimate_minutes = 45
 touches = ["src/wordfreq/cli.py", "tests/test_cli.py"]
-acceptance = "uv run pytest -q -k json and uv run ruff check ."
+acceptance = "uv run pytest -q -k json && uv run ruff check ."
 # A real artifact dependency, not narrative ordering: the JSON document has to
 # honour the limit, so the flag has to exist before its output can be shaped.
 depends = [{ on = "top-n", for = "the --top N flag whose limit the JSON must honour" }]
@@ -70,7 +70,7 @@ lane = "cloud"
 verify = "auto"
 estimate_minutes = 30
 touches = ["README.md"]
-acceptance = "uv run pytest -q and grep -q -- '--top' README.md and grep -q -- '--stopwords' README.md and grep -q -- '--json' README.md and grep -q -- 'encoding' README.md"
+acceptance = "uv run pytest -q && grep -q -- '--top' README.md && grep -q -- '--stopwords' README.md && grep -q -- '--json' README.md && grep -q -- 'encoding' README.md"
 depends = [
     { on = "top-n", for = "the --top N flag's final spelling and default" },
     { on = "stopwords", for = "the --stopwords flag's final spelling and word list" },
