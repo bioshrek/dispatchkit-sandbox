@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from wordfreq.count import Count, count_words, tokenise
+from wordfreq.count import STOPWORDS, Count, count_words, tokenise
 
 
 class TestTokenise:
@@ -25,3 +25,12 @@ class TestCountWords:
 
     def test_empty_text_counts_nothing(self) -> None:
         assert count_words("") == []
+
+    def test_stopwords_default_off_keeps_the_word_the(self) -> None:
+        assert count_words("the the cat")[0] == Count(word="the", total=2)
+
+    def test_stopwords_filters_common_words_when_given(self) -> None:
+        assert count_words("the the cat", stopwords=STOPWORDS) == [Count(word="cat", total=1)]
+
+    def test_stopwords_does_not_change_output_when_none_match(self) -> None:
+        assert count_words("cat dog", stopwords=STOPWORDS) == count_words("cat dog")

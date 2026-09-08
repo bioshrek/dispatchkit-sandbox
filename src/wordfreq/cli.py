@@ -6,12 +6,17 @@ import argparse
 import sys
 from pathlib import Path
 
-from wordfreq.count import count_words
+from wordfreq.count import STOPWORDS, count_words
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="wordfreq", description="Count words in a file.")
     parser.add_argument("path", type=Path, help="the file to read")
+    parser.add_argument(
+        "--stopwords",
+        action="store_true",
+        help="filter out common English stopwords (e.g. 'the', 'a', 'is')",
+    )
     parser.add_argument(
         "--top",
         type=int,
@@ -30,7 +35,8 @@ def main(argv: list[str] | None = None) -> int:
         print(f"wordfreq: cannot read {args.path}: {exc}", file=sys.stderr)
         return 2
 
-    counts = count_words(text)
+    stopwords = STOPWORDS if args.stopwords else None
+    counts = count_words(text, stopwords=stopwords)
     if args.top is not None:
         counts = counts[: args.top]
 
