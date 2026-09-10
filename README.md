@@ -21,10 +21,26 @@ Use `--top` to keep output short when you only need the most frequent words:
 uv run wordfreq README.md --top 5
 ```
 
+Use `--min-count` to hide words that do not occur often enough (default: `1`). It is
+applied before `--top`, so `--top` selects the most frequent words from the remaining
+words:
+
+```sh
+uv run wordfreq README.md --min-count 3 --top 5
+```
+
 Use `--stopwords` to drop common words like `the` so domain words surface first:
 
 ```sh
 uv run wordfreq README.md --stopwords
+```
+
+Use `--total` to print the total and distinct counts after the table (default: off).
+The total describes that table after its filters, not the whole file, so
+`--stopwords --total` can report fewer words than the file contains:
+
+```sh
+uv run wordfreq README.md --stopwords --total
 ```
 
 Use `--json` for machine-readable output that can be piped to other tools:

@@ -31,9 +31,20 @@ def main(argv: list[str] | None = None) -> int:
         help="print only the N most frequent words (default: print all)",
     )
     parser.add_argument(
+        "--min-count",
+        type=int,
+        default=1,
+        help="drop words occurring fewer than N times (default: 1)",
+    )
+    parser.add_argument(
         "--json",
         action="store_true",
         help="emit counts as a JSON array",
+    )
+    parser.add_argument(
+        "--total",
+        action="store_true",
+        help="print the total and distinct counts after the table",
     )
     args = parser.parse_args(argv)
 
@@ -46,6 +57,13 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.top is not None and args.top < 0:
         print(f"wordfreq: --top must not be negative, got {args.top}", file=sys.stderr)
+        return 2
+
+    if args.min_count < 0:
+        print(
+            f"wordfreq: --min-count must not be negative, got {args.min_count}",
+            file=sys.stderr,
+        )
         return 2
 
     try:
@@ -65,7 +83,7 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     stopwords = STOPWORDS if args.stopwords else None
-    counts = count_words(text, stopwords=stopwords)
+    counts = count_words(text, stopwords=stopwords, min_count=args.min_count)
     if args.top is not None:
         counts = counts[: args.top]
 
@@ -75,6 +93,8 @@ def main(argv: list[str] | None = None) -> int:
 
     for count in counts:
         print(f"{count.total:>7}  {count.word}")
+    if args.total:
+        print(f"Total: {sum(count.total for count in counts)} words, {len(counts)} distinct words")
     return 0
 
 

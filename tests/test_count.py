@@ -2,6 +2,11 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
+import pytest
+
+from wordfreq.cli import main
 from wordfreq.count import STOPWORDS, Count, count_words, tokenise
 
 
@@ -34,3 +39,27 @@ class TestCountWords:
 
     def test_stopwords_does_not_change_output_when_none_match(self) -> None:
         assert count_words("cat dog", stopwords=STOPWORDS) == count_words("cat dog")
+
+    def test_mincount_drops_words_below_threshold_and_keeps_words_at_it(self) -> None:
+        assert count_words("rare common common", min_count=2) == [Count(word="common", total=2)]
+
+    def test_mincount_default_keeps_everything(self) -> None:
+        assert count_words("rare common common") == count_words("rare common common", min_count=1)
+
+    def test_mincount_composes_with_top_after_filtering(
+        self, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+    ) -> None:
+        source = tmp_path / "sample.txt"
+        source.write_text("common common common medium medium rare", encoding="utf-8")
+
+        assert main([str(source), "--min-count", "2", "--top", "2"]) == 0
+        assert capsys.readouterr().out == "      3  common\n      2  medium\n"
+
+    def test_mincount_negative_is_rejected(
+        self, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+    ) -> None:
+        source = tmp_path / "sample.txt"
+        source.write_text("word", encoding="utf-8")
+
+        assert main([str(source), "--min-count", "-1"]) == 2
+        assert "--min-count" in capsys.readouterr().err

@@ -103,6 +103,32 @@ def test_top_without_flag_prints_everything(
     assert "1  b" in out
 
 
+def test_total_is_printed_only_when_requested(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    source = tmp_path / "sample.txt"
+    source.write_text("a a b", encoding="utf-8")
+
+    assert main([str(source)]) == 0
+    assert "Total:" not in capsys.readouterr().out
+
+    assert main([str(source), "--total"]) == 0
+    out = capsys.readouterr().out
+    assert out.endswith("Total: 3 words, 2 distinct words\n")
+
+
+def test_total_reflects_stopwords_filtering(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    source = tmp_path / "sample.txt"
+    source.write_text("the the cat dog", encoding="utf-8")
+
+    assert main([str(source), "--stopwords", "--total"]) == 0
+    out = capsys.readouterr().out
+    assert out.endswith("Total: 2 words, 2 distinct words\n")
+    assert "the" not in out
+
+
 def test_top_negative_is_rejected(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     source = tmp_path / "sample.txt"
     source.write_text("a a b", encoding="utf-8")
