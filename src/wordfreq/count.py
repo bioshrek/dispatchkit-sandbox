@@ -89,6 +89,4 @@ def count_words(
         words = [word for word in words if word not in stopwords]
     counter = Counter(words)
     ordered = sorted(counter.items(), key=lambda item: (-item[1], item[0]))
-    return [
-        Count(word=word, total=total) for word, total in ordered if total >= min_count
-    ]
+    return [Count(word=word, total=total) for word, total in ordered if total >= min_count]

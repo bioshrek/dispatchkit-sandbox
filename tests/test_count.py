@@ -41,14 +41,10 @@ class TestCountWords:
         assert count_words("cat dog", stopwords=STOPWORDS) == count_words("cat dog")
 
     def test_mincount_drops_words_below_threshold_and_keeps_words_at_it(self) -> None:
-        assert count_words("rare common common", min_count=2) == [
-            Count(word="common", total=2)
-        ]
+        assert count_words("rare common common", min_count=2) == [Count(word="common", total=2)]
 
     def test_mincount_default_keeps_everything(self) -> None:
-        assert count_words("rare common common") == count_words(
-            "rare common common", min_count=1
-        )
+        assert count_words("rare common common") == count_words("rare common common", min_count=1)
 
     def test_mincount_composes_with_top_after_filtering(
         self, tmp_path: Path, capsys: pytest.CaptureFixture[str]
