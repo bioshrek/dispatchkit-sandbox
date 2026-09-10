@@ -41,6 +41,11 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="emit counts as a JSON array",
     )
+    parser.add_argument(
+        "--total",
+        action="store_true",
+        help="print the total and distinct counts after the table",
+    )
     args = parser.parse_args(argv)
 
     if args.version:
@@ -88,6 +93,8 @@ def main(argv: list[str] | None = None) -> int:
 
     for count in counts:
         print(f"{count.total:>7}  {count.word}")
+    if args.total:
+        print(f"Total: {sum(count.total for count in counts)} words, {len(counts)} distinct words")
     return 0
 
 
