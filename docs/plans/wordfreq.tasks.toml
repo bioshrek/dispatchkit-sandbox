@@ -17,7 +17,6 @@ lane = "cloud"
 # `auto` because the acceptance is a test selector and a linter: a pass or a
 # fail is the whole judgement, and there is nothing left for a human to weigh.
 verify = "auto"
-estimate_minutes = 30
 touches = ["src/wordfreq/cli.py", "tests/test_cli.py"]
 acceptance = "uv run pytest -q -k top && uv run ruff check ."
 body_file = "wordfreq/top-n.md"
@@ -30,7 +29,6 @@ lane = "cloud"
 # `auto` because the acceptance is a pytest selector: there is nothing here a
 # human judges that the command does not already decide.
 verify = "auto"
-estimate_minutes = 45
 touches = ["src/wordfreq/count.py", "tests/test_count.py"]
 acceptance = "uv run pytest -q -k stopword && uv run ruff check ."
 body_file = "wordfreq/stopwords.md"
@@ -41,7 +39,6 @@ title = "Survive a non-UTF-8 file"
 milestone = "wordfreq v0.2"
 lane = "cloud"
 verify = "human"
-estimate_minutes = 30
 touches = ["src/wordfreq/cli.py", "tests/test_cli.py"]
 acceptance = "uv run pytest -q -k encoding && uv run ruff check ."
 body_file = "wordfreq/encoding-fallback.md"
@@ -52,7 +49,6 @@ title = "Emit machine-readable counts with --json"
 milestone = "wordfreq v0.2"
 lane = "cloud"
 verify = "human"
-estimate_minutes = 45
 touches = ["src/wordfreq/cli.py", "tests/test_cli.py"]
 acceptance = "uv run pytest -q -k json && uv run ruff check ."
 # A real artifact dependency, not narrative ordering: the JSON document has to
@@ -75,7 +71,6 @@ title = "Document the new flags in the README"
 milestone = "wordfreq v0.2"
 lane = "cloud"
 verify = "auto"
-estimate_minutes = 30
 # The acceptance is a test, so the test file is part of the scope. Declaring
 # only README.md withheld the merge on scope drift: the body asks for a test
 # CI can run, and `touches` has to admit the file that holds it.
@@ -88,3 +83,20 @@ depends = [
     { on = "encoding-fallback", for = "the fallback's behaviour, which the README states" },
 ]
 body_file = "wordfreq/document-flags.md"
+
+# The first task the *local* lane ever ran. Deliberately the smallest real
+# chore left in `wordfreq`: one flag, one test, no dependency on anything.
+#
+# `lane = "local"` is the whole point. Every task above ran in a cloud agent's
+# ephemeral container; this one runs on a real workstation, through
+# `runner.argv`, in a git worktree, and pushes from this machine. That path had
+# been built, unit-tested and never once executed against a real repository.
+[[task]]
+id = "version-flag"
+title = "Report the package version with --version"
+milestone = "wordfreq v0.2"
+lane = "local"
+verify = "auto"
+touches = ["src/wordfreq/__init__.py", "src/wordfreq/cli.py", "tests/test_cli.py"]
+acceptance = "uv run pytest -q -k version && uv run ruff check ."
+body_file = "wordfreq/version-flag.md"
