@@ -31,6 +31,16 @@ def main(argv: list[str] | None = None) -> int:
 
     try:
         text = args.path.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        print(
+            f"wordfreq: {args.path} is not valid UTF-8; replacing undecodable bytes",
+            file=sys.stderr,
+        )
+        try:
+            text = args.path.read_text(encoding="utf-8", errors="replace")
+        except OSError as exc:
+            print(f"wordfreq: cannot read {args.path}: {exc}", file=sys.stderr)
+            return 2
     except OSError as exc:
         print(f"wordfreq: cannot read {args.path}: {exc}", file=sys.stderr)
         return 2

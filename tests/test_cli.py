@@ -49,6 +49,26 @@ def test_top_limits_the_number_of_printed_words(
     assert "1  b" not in out
 
 
+def test_encoding_fallback_counts_file_with_invalid_utf8(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    source = tmp_path / "latin1.txt"
+    source.write_bytes(b"caf\xe9 cafe cafe")
+
+    assert main([str(source)]) == 0
+    captured = capsys.readouterr()
+    assert "2  cafe" in captured.out
+    assert "1  caf" in captured.out
+    assert "not valid UTF-8" in captured.err
+
+
+def test_encoding_missing_file_still_reports_oserror(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    assert main([str(tmp_path / "nope.txt")]) == 2
+    assert "cannot read" in capsys.readouterr().err
+
+
 def test_top_zero_prints_nothing(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     source = tmp_path / "sample.txt"
     source.write_text("a a b", encoding="utf-8")
