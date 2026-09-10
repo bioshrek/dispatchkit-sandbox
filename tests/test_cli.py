@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pytest
@@ -95,3 +96,37 @@ def test_top_negative_is_rejected(tmp_path: Path, capsys: pytest.CaptureFixture[
 
     assert main([str(source), "--top", "-1"]) == 2
     assert "--top" in capsys.readouterr().err
+
+
+def test_json_prints_machine_readable_counts(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    source = tmp_path / "sample.txt"
+    source.write_text("b a a", encoding="utf-8")
+
+    assert main([str(source), "--json"]) == 0
+    assert json.loads(capsys.readouterr().out) == [
+        {"word": "a", "total": 2},
+        {"word": "b", "total": 1},
+    ]
+
+
+def test_json_honours_top_limit(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    source = tmp_path / "sample.txt"
+    source.write_text("c b a a", encoding="utf-8")
+
+    assert main([str(source), "--json", "--top", "2"]) == 0
+    assert json.loads(capsys.readouterr().out) == [
+        {"word": "a", "total": 2},
+        {"word": "b", "total": 1},
+    ]
+
+
+def test_json_empty_input_is_empty_array(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    source = tmp_path / "empty.txt"
+    source.write_text("", encoding="utf-8")
+
+    assert main([str(source), "--json"]) == 0
+    assert json.loads(capsys.readouterr().out) == []
