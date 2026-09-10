@@ -12,7 +12,11 @@ local = 1
 
 [retry]
 # Attempts before a task is labelled `dispatch:stuck` and left alone.
-budget = 3
+# Raised from 3 while `version-flag` was the first task ever run through the
+# local lane: its early attempts were spent on defects in the runner rather
+# than on the task, and attempts are derived from the issue timeline, so
+# there is nothing to reset.
+budget = 8
 
 [paths]
 # Where committed task graphs live: `<plans>/<plan>.tasks.toml`.
