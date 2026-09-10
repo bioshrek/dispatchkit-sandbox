@@ -75,15 +75,20 @@ def tokenise(text: str) -> list[str]:
     return _WORD.findall(text.lower())
 
 
-def count_words(text: str, stopwords: frozenset[str] | None = None) -> list[Count]:
+def count_words(
+    text: str, stopwords: frozenset[str] | None = None, min_count: int = 1
+) -> list[Count]:
     """Counts, most frequent first, ties broken alphabetically so it is stable.
 
     `stopwords`, if given, is a set of words to drop after tokenising and
     before counting. Left as `None` (the default), no filtering happens.
+    `min_count` drops words whose total is below the given threshold.
     """
     words = tokenise(text)
     if stopwords:
         words = [word for word in words if word not in stopwords]
     counter = Counter(words)
     ordered = sorted(counter.items(), key=lambda item: (-item[1], item[0]))
-    return [Count(word=word, total=total) for word, total in ordered]
+    return [
+        Count(word=word, total=total) for word, total in ordered if total >= min_count
+    ]
