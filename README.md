@@ -21,6 +21,12 @@ Use `--top` to keep output short when you only need the most frequent words:
 uv run wordfreq README.md --top 5
 ```
 
+Use `--min-count` to hide words that do not occur often enough, before applying `--top`:
+
+```sh
+uv run wordfreq README.md --min-count 3 --top 5
+```
+
 Use `--stopwords` to drop common words like `the` so domain words surface first:
 
 ```sh
