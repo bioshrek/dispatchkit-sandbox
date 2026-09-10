@@ -76,7 +76,10 @@ milestone = "wordfreq v0.2"
 lane = "cloud"
 verify = "auto"
 estimate_minutes = 30
-touches = ["README.md"]
+# The acceptance is a test, so the test file is part of the scope. Declaring
+# only README.md withheld the merge on scope drift: the body asks for a test
+# CI can run, and `touches` has to admit the file that holds it.
+touches = ["README.md", "tests/test_readme.py"]
 acceptance = "uv run pytest -q -k readme"
 depends = [
     { on = "top-n", for = "the --top N flag's final spelling and default" },
