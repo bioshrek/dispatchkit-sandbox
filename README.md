@@ -13,12 +13,29 @@ proves nothing about the pipeline that dispatched it.
 uv run wordfreq README.md
 ```
 
-## Why the payload is unfinished on purpose
+## `wordfreq` at a glance
 
-The gaps below are the backlog the scheduler dispatches. Each one is a genuine chore that
-produces a genuine diff and takes genuine CI time.
+Use `--top` to keep output short when you only need the most frequent words:
 
-- No `--top N` limit; it prints every word.
-- No stopword filtering, so `the` wins every time.
-- No `--json` output, so nothing downstream can consume it.
-- `read_text` has no encoding fallback, so it raises on a non-UTF-8 file.
+```sh
+uv run wordfreq README.md --top 5
+```
+
+Use `--stopwords` to drop common words like `the` so domain words surface first:
+
+```sh
+uv run wordfreq README.md --stopwords
+```
+
+Use `--json` for machine-readable output that can be piped to other tools:
+
+```sh
+uv run wordfreq README.md --json --top 3
+```
+
+If a file is not valid UTF-8, `wordfreq` falls back to UTF-8 with replacement, warns on stderr,
+and still returns counts:
+
+```sh
+uv run wordfreq docs/latin1-sample.txt
+```
