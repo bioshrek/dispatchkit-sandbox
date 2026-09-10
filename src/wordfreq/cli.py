@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
@@ -22,6 +23,11 @@ def main(argv: list[str] | None = None) -> int:
         type=int,
         default=None,
         help="print only the N most frequent words (default: print all)",
+    )
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        help="emit counts as a JSON array",
     )
     args = parser.parse_args(argv)
 
@@ -49,6 +55,10 @@ def main(argv: list[str] | None = None) -> int:
     counts = count_words(text, stopwords=stopwords)
     if args.top is not None:
         counts = counts[: args.top]
+
+    if args.json:
+        print(json.dumps([{"word": count.word, "total": count.total} for count in counts]))
+        return 0
 
     for count in counts:
         print(f"{count.total:>7}  {count.word}")
