@@ -3,11 +3,24 @@
 from __future__ import annotations
 
 import json
+from importlib.metadata import version
 from pathlib import Path
 
 import pytest
 
 from wordfreq.cli import main
+
+
+def test_version_flag_prints_metadata_version(capsys: pytest.CaptureFixture[str]) -> None:
+    assert main(["--version"]) == 0
+    assert capsys.readouterr().out == f"{version('wordfreq')}\n"
+
+
+def test_version_flag_works_without_path_argument(capsys: pytest.CaptureFixture[str]) -> None:
+    assert main(["--version"]) == 0
+    captured = capsys.readouterr()
+    assert captured.out == f"{version('wordfreq')}\n"
+    assert captured.err == ""
 
 
 def test_it_prints_a_count(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:

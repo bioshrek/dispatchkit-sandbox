@@ -7,12 +7,18 @@ import json
 import sys
 from pathlib import Path
 
+from wordfreq import __version__
 from wordfreq.count import STOPWORDS, count_words
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="wordfreq", description="Count words in a file.")
-    parser.add_argument("path", type=Path, help="the file to read")
+    parser.add_argument("path", nargs="?", type=Path, help="the file to read")
+    parser.add_argument(
+        "--version",
+        action="store_true",
+        help="print the installed package version and exit",
+    )
     parser.add_argument(
         "--stopwords",
         action="store_true",
@@ -30,6 +36,13 @@ def main(argv: list[str] | None = None) -> int:
         help="emit counts as a JSON array",
     )
     args = parser.parse_args(argv)
+
+    if args.version:
+        print(__version__)
+        return 0
+
+    if args.path is None:
+        parser.error("the following arguments are required: path")
 
     if args.top is not None and args.top < 0:
         print(f"wordfreq: --top must not be negative, got {args.top}", file=sys.stderr)
