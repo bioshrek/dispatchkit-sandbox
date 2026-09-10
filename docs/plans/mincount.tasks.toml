@@ -2,6 +2,13 @@ plan = "mincount"
 
 # The first plan dispatchkit ever ran on a branch of its own (D16).
 #
+# Every `acceptance` here ends in `ruff format --check .` because CI does, and
+# the first run found out the hard way: the agent's work passed its own
+# definition of done and failed the pipeline's, on formatting alone. The
+# acceptance-subset-of-CI lint cannot catch this -- a subset is exactly what it
+# checks for -- so an acceptance that omits a CI step is a green task with a
+# red pull request, which is the one shape `verify: auto` cannot resolve.
+#
 # `base` is the whole reason this plan exists. Every task below branches from
 # `plan/mincount` and merges back into it; nothing here reaches `main` until a
 # human reads the one pull request dispatchkit opens when the last task closes.
@@ -19,7 +26,7 @@ milestone = "wordfreq v0.3"
 lane = "local"
 verify = "auto"
 touches = ["src/wordfreq/count.py", "src/wordfreq/cli.py", "tests/test_count.py"]
-acceptance = "uv run pytest -q -k mincount && uv run ruff check ."
+acceptance = "uv run pytest -q -k mincount && uv run ruff check . && uv run ruff format --check ."
 body_file = "mincount/min-count.md"
 
 # Independent of `min-count`, and deliberately so: a plan whose tasks form a
@@ -34,7 +41,7 @@ milestone = "wordfreq v0.3"
 lane = "local"
 verify = "auto"
 touches = ["src/wordfreq/cli.py", "tests/test_cli.py"]
-acceptance = "uv run pytest -q -k total && uv run ruff check ."
+acceptance = "uv run pytest -q -k total && uv run ruff check . && uv run ruff format --check ."
 body_file = "mincount/total-line.md"
 
 # The dependencies are artifact ones: the README cannot state a flag's spelling
@@ -46,7 +53,7 @@ milestone = "wordfreq v0.3"
 lane = "local"
 verify = "auto"
 touches = ["README.md", "tests/test_readme.py"]
-acceptance = "uv run pytest -q -k readme"
+acceptance = "uv run pytest -q -k readme && uv run ruff format --check ."
 depends = [
     { on = "min-count", for = "the --min-count flag's spelling and default" },
     { on = "total-line", for = "the --total flag's spelling and the line it prints" },
