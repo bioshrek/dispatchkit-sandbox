@@ -1,0 +1,54 @@
+plan = "mincount"
+
+# The first plan dispatchkit ever ran on a branch of its own (D16).
+#
+# `base` is the whole reason this plan exists. Every task below branches from
+# `plan/mincount` and merges back into it; nothing here reaches `main` until a
+# human reads the one pull request dispatchkit opens when the last task closes.
+#
+# Two tasks rather than one, and the second depends on the first, because the
+# property worth proving is not "a branch was made" — it is that a dependent
+# starts from a tip carrying its dependency's code. On `main` that happened for
+# free. Here it only happens if the base threaded all the way through.
+base = "plan/mincount"
+
+[[task]]
+id = "min-count"
+title = "Drop rare words with --min-count N"
+milestone = "wordfreq v0.3"
+lane = "local"
+verify = "auto"
+touches = ["src/wordfreq/count.py", "src/wordfreq/cli.py", "tests/test_count.py"]
+acceptance = "uv run pytest -q -k mincount && uv run ruff check ."
+body_file = "mincount/min-count.md"
+
+# Independent of `min-count`, and deliberately so: a plan whose tasks form a
+# single chain pays dispatch overhead for every task and runs none of them
+# concurrently, which `validate --strict` refuses. It is also the shape worth
+# testing here -- two branches cut from the same plan base, merging into it
+# separately.
+[[task]]
+id = "total-line"
+title = "Summarise the count with --total"
+milestone = "wordfreq v0.3"
+lane = "local"
+verify = "auto"
+touches = ["src/wordfreq/cli.py", "tests/test_cli.py"]
+acceptance = "uv run pytest -q -k total && uv run ruff check ."
+body_file = "mincount/total-line.md"
+
+# The dependencies are artifact ones: the README cannot state a flag's spelling
+# or its default before the flag exists.
+[[task]]
+id = "min-count-readme"
+title = "Document the new flags in the README"
+milestone = "wordfreq v0.3"
+lane = "local"
+verify = "auto"
+touches = ["README.md", "tests/test_readme.py"]
+acceptance = "uv run pytest -q -k readme"
+depends = [
+    { on = "min-count", for = "the --min-count flag's spelling and default" },
+    { on = "total-line", for = "the --total flag's spelling and the line it prints" },
+]
+body_file = "mincount/min-count-readme.md"
